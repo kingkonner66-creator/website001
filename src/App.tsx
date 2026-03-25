@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu as MenuIcon, X, Phone, MapPin, Clock, Instagram, Facebook } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 import { MENU_DATA } from './data';
 import { HeroGeometric } from './components/ui/shape-landing-hero';
 
@@ -144,37 +143,28 @@ const FeaturedDishes = () => {
   const [featuredImages, setFeaturedImages] = useState<Record<string, string>>({});
   const featured = MENU_DATA.flatMap(cat => cat.items).filter(item => item.featured).slice(0, 3);
   
+  // High-quality fallbacks if API fails
+  const fallbacks: Record<string, string> = {
+    'nachos-el-vaquero': 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?auto=format&fit=crop&q=80&w=800',
+    'burrito-california': 'https://images.unsplash.com/photo-1584031036380-3fb6f2d51880?auto=format&fit=crop&q=80&w=800',
+    'enchiladas-supremas': 'https://images.unsplash.com/photo-1534352956274-44d7b23f9611?auto=format&fit=crop&q=80&w=800'
+  };
+  
   useEffect(() => {
     const generateImages = async () => {
       try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        
         const promises = featured.map(async (dish) => {
-          // Skip if already has an image in data.ts (though we want to replace them with authentic ones)
-          // For this request, we specifically want to generate for these 3
-          const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-image',
-            contents: {
-              parts: [
-                {
-                  text: `${dish.name}: ${dish.description}. Authentic Mexican restaurant style, vibrant colors, close-up shot, appetizing, high resolution.`,
-                },
-              ],
-            },
-            config: {
-              imageConfig: {
-                aspectRatio: "1:1",
-                imageSize: "1K"
-              },
-            },
+          const response = await fetch('/api/generate-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              prompt: `${dish.name}: ${dish.description}. Authentic Mexican restaurant style, vibrant colors, close-up shot, appetizing, high resolution.`
+            })
           });
 
-          for (const part of response.candidates[0].content.parts) {
-            if (part.inlineData) {
-              return { id: dish.id, data: `data:image/png;base64,${part.inlineData.data}` };
-            }
-          }
-          return null;
+          if (!response.ok) throw new Error('Failed to generate image');
+          const { data } = await response.json();
+          return { id: dish.id, data };
         });
 
         const results = await Promise.all(promises);
@@ -215,7 +205,7 @@ const FeaturedDishes = () => {
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-3xl mb-6">
                 <img
-                  src={featuredImages[dish.id] || dish.image || `https://picsum.photos/seed/${dish.id}/800/1000`}
+                  src={featuredImages[dish.id] || fallbacks[dish.id] || dish.image || `https://picsum.photos/seed/${dish.id}/800/1000`}
                   alt={dish.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   referrerPolicy="no-referrer"
@@ -296,30 +286,17 @@ const About = () => {
   useEffect(() => {
     const generateLogo = async () => {
       try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash-image',
-          contents: {
-            parts: [
-              {
-                text: "A professional restaurant logo for 'EL VAQUERO MEXICAN RESTAURANT'. The background features a light teal silhouette map of Mexico. The main text 'EL VAQUERO' is in a bold, orange serif font with a dark teal outline. Below it, 'MEXICAN RESTAURANT' is in a clean, dark teal sans-serif font. Above 'VAQUERO', it says 'Est. 1999' in a small dark teal font. At the bottom, there is a solid orange bar with the white text 'Moberly\'s Original Mexican Restaurant!'. The overall design is clean, high-resolution, and professional, suitable for a restaurant website.",
-              },
-            ],
-          },
-          config: {
-            imageConfig: {
-              aspectRatio: "1:1",
-              imageSize: "1K"
-            },
-          },
+        const response = await fetch('/api/generate-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: "A professional restaurant logo for 'EL VAQUERO MEXICAN RESTAURANT'. The background features a light teal silhouette map of Mexico. The main text 'EL VAQUERO' is in a bold, orange serif font with a dark teal outline. Below it, 'MEXICAN RESTAURANT' is in a clean, dark teal sans-serif font. Above 'VAQUERO', it says 'Est. 1999' in a small dark teal font. At the bottom, there is a solid orange bar with the white text 'Moberly\'s Original Mexican Restaurant!'. The overall design is clean, high-resolution, and professional, suitable for a restaurant website."
+          })
         });
 
-        for (const part of response.candidates[0].content.parts) {
-          if (part.inlineData) {
-            setLogoImage(`data:image/png;base64,${part.inlineData.data}`);
-            break;
-          }
-        }
+        if (!response.ok) throw new Error('Failed to generate logo');
+        const { data } = await response.json();
+        setLogoImage(data);
       } catch (error) {
         console.error('Error generating logo image:', error);
       }
@@ -347,7 +324,11 @@ const About = () => {
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <div className="w-full h-full bg-gray-100 animate-pulse rounded-2xl" />
+              <div className="w-full h-full flex flex-col items-center justify-center text-center p-4">
+                <div className="text-4xl font-serif font-bold text-primary-orange mb-2">EL VAQUERO</div>
+                <div className="text-sm uppercase tracking-widest text-primary-teal">Mexican Restaurant</div>
+                <div className="mt-4 w-12 h-1 bg-primary-orange rounded-full" />
+              </div>
             )}
           </motion.div>
           <div className="absolute -bottom-8 -right-8 bg-primary-teal p-8 rounded-3xl hidden md:block text-white border-4 border-primary-orange shadow-xl">
