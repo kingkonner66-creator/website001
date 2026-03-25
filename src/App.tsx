@@ -147,7 +147,7 @@ const FeaturedDishes = () => {
   const fallbacks: Record<string, string> = {
     'nachos-el-vaquero': 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?auto=format&fit=crop&q=80&w=800',
     'burrito-california': 'https://images.unsplash.com/photo-1584031036380-3fb6f2d51880?auto=format&fit=crop&q=80&w=800',
-    'enchiladas-supremas': 'https://images.unsplash.com/photo-1534352956274-44d7b23f9611?auto=format&fit=crop&q=80&w=800'
+    'enchiladas-supremas': 'https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?auto=format&fit=crop&q=80&w=800'
   };
   
   useEffect(() => {
@@ -419,23 +419,18 @@ const Contact = () => {
             </div>
           </div>
 
-          {/* Map Placeholder */}
-          <div className="lg:col-span-2 rounded-3xl overflow-hidden h-[400px] shadow-lg relative">
-            <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-              <div className="text-center p-8">
-                <MapPin size={48} className="mx-auto text-primary-teal mb-4" />
-                <p className="text-xl font-serif italic">Interactive Map Coming Soon</p>
-                <p className="text-ink/50 mt-2">721 North Morley Street, Moberly, MO</p>
-                <a 
-                  href="https://www.google.com/maps/search/?api=1&query=721+North+Morley+Street+Moberly+MO+65270" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="mt-6 inline-block btn-primary"
-                >
-                  Open in Google Maps
-                </a>
-              </div>
-            </div>
+          {/* Google Maps Embed */}
+          <div className="lg:col-span-2 rounded-3xl overflow-hidden h-[400px] shadow-lg relative border-4 border-white">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3101.444654308553!2d-92.4385316234551!3d39.43553197161358!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87d9539f7a777777%3A0x7777777777777777!2s721%20N%20Morley%20St%2C%20Moberly%2C%20MO%2065270!5e0!3m2!1sen!2sus!4v1711385000000!5m2!1sen!2sus"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="El Vaquero Location"
+            ></iframe>
           </div>
         </div>
       </div>
