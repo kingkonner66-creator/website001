@@ -1,0 +1,43 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  --font-serif: "Libre Baskerville", serif;
+  --font-sans: "Inter", sans-serif;
+
+  --color-primary-orange: #E76F27;
+  --color-primary-teal: #1D5D5D;
+  --color-light-teal: #A5D6D1;
+  --color-cream: #FDFBF7;
+  --color-ink: #1A2E2E;
+}
+
+@layer utilities {
+  .bg-pattern {
+    background-image: radial-gradient(var(--color-primary-orange) 0.5px, transparent 0.5px), radial-gradient(var(--color-primary-teal) 0.5px, var(--color-cream) 0.5px);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    opacity: 0.03;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-cream text-ink font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif text-primary-teal;
+  }
+}
+
+.menu-item-card {
+  @apply bg-white p-6 rounded-2xl shadow-sm border border-primary-teal/5 hover:shadow-md transition-shadow;
+}
+
+.btn-primary {
+  @apply bg-primary-orange text-white px-8 py-3 rounded-full font-medium hover:bg-orange-700 transition-colors inline-block shadow-lg shadow-primary-orange/20;
+}
+
+.btn-outline {
+  @apply border-2 border-primary-teal text-primary-teal px-8 py-3 rounded-full font-medium hover:bg-primary-teal hover:text-white transition-all inline-block;
+}
